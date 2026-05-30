@@ -10,15 +10,16 @@ import (
 	"sync"
 	"text/tabwriter"
 
+	"github.com/ismdeep/harbor-cleaner/harbor"
 	"github.com/ismdeep/log"
 	"github.com/kopeisec/fp"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
-
-	"github.com/ismdeep/harbor-cleaner/harbor"
 )
 
 func main() {
+	log.Init("console://[stdout]?level=debug&time_encoder=rfc3339")
+
 	var endpoint, username, password, project string
 	var filters []string
 	var concurrency int
@@ -29,6 +30,10 @@ func main() {
 		Long:  "Connect to a Harbor registry, list image tags matching the given regex filters, and delete them after confirmation.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+
+			if concurrency < 1 {
+				concurrency = 1
+			}
 
 			if len(filters) == 0 {
 				return fmt.Errorf("at least one --filter regex is required")
@@ -52,7 +57,7 @@ func main() {
 				}
 			}
 
-			client, err := harbor.NewClient(ctx, endpoint, username, password)
+			client, err := harbor.NewClient(ctx, endpoint, username, password, concurrency)
 			if err != nil {
 				return err
 			}

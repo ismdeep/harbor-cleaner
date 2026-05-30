@@ -109,7 +109,7 @@ func (receiver *Client) ListProjectTags(project string) ([]TagInfo, error) {
 		tags  []TagInfo
 		mu    sync.Mutex
 		wg    sync.WaitGroup
-		sem   = make(chan struct{}, 4)
+		sem   = make(chan struct{}, receiver.concurrency)
 		total = len(repos)
 	)
 

@@ -2,6 +2,7 @@ package harbor
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -11,14 +12,15 @@ import (
 )
 
 type Client struct {
-	ctx        context.Context
-	endpoint   string
-	host       string
-	username   string
-	password   string
-	cookie     string
-	csrf       string
-	httpClient *http.Client
+	ctx         context.Context
+	endpoint    string
+	host        string
+	username    string
+	password    string
+	cookie      string
+	csrf        string
+	concurrency int
+	httpClient  *http.Client
 }
 
 type TagInfo struct {
@@ -28,22 +30,23 @@ type TagInfo struct {
 	Image      string
 }
 
-func NewClient(ctx context.Context, endpoint string, username string, password string) (*Client, error) {
+func NewClient(ctx context.Context, endpoint string, username string, password string, concurrency int) (*Client, error) {
 
 	client := Client{
-		ctx:        ctx,
-		endpoint:   endpoint,
-		host:       "",
-		username:   username,
-		password:   password,
-		cookie:     "",
-		csrf:       "",
-		httpClient: &http.Client{Transport: &http.Transport{}},
+		ctx:         ctx,
+		endpoint:    endpoint,
+		host:        "",
+		username:    username,
+		password:    password,
+		cookie:      "",
+		csrf:        "",
+		concurrency: concurrency,
+		httpClient:  &http.Client{Transport: &http.Transport{}},
 	}
 
 	u, err := url.Parse(client.endpoint)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(errors.New("failed to extract host from endpoint"), err)
 	}
 	client.host = u.Host
 
