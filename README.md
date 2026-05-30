@@ -14,6 +14,8 @@ harbor-cleaner [global flags] <command> [command flags]
 |---------|-------------|
 | `clean` | Delete tags matching regex filters (with confirmation) |
 | `tags` | List all tags in a project |
+| `repos` | List all repos in a project with storage size |
+| `quotas` | Show quota usage of all projects |
 | `version` | Print version and build info |
 
 ## Global Flags
@@ -34,9 +36,21 @@ harbor-cleaner [global flags] <command> [command flags]
 
 ## `tags` Flags
 
-| Flag | Short | Type | Description |
-|------|-------|------|-------------|
-| `--project` | | `string` | Harbor project name or ID (required) |
+| Flag | Short | Type | Description | Default |
+|------|-------|------|-------------|---------|
+| `--project` | | `string` | Harbor project name or ID | |
+| `--order` | | `string` | Order by field (`name` or `size`) | `name` |
+
+## `repos` Flags
+
+| Flag | Short | Type | Description | Default |
+|------|-------|------|-------------|---------|
+| `--project` | | `string` | Harbor project name or ID | |
+| `--order` | | `string` | Order by field (`name` or `size`) | `name`
+
+## `quotas` Flags
+
+No additional flags.
 
 ## Examples
 
@@ -63,6 +77,28 @@ harbor-cleaner \
   --password Harbor12345 \
   tags \
   --project my-project
+```
+
+List all repos in a project (ordered by size):
+
+```bash
+harbor-cleaner \
+  --endpoint https://docker.example.com \
+  --username admin \
+  --password Harbor12345 \
+  repos \
+  --project my-project \
+  --order size
+```
+
+Show quota usage of all projects:
+
+```bash
+harbor-cleaner \
+  --endpoint https://docker.example.com \
+  --username admin \
+  --password Harbor12345 \
+  quotas
 ```
 
 ## Build
