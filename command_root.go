@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 
 	"github.com/spf13/cobra"
 
@@ -19,6 +20,20 @@ func RootCommand() *cobra.Command {
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
+			if cmd.Use == "version" {
+				return nil
+			}
+
+			// check
+			if endpoint == "" {
+				return errors.New("endpoint is required")
+			}
+			if username == "" {
+				return errors.New("username is required")
+			}
+			if password == "" {
+				return errors.New("password is required")
+			}
 			if concurrency < 1 {
 				concurrency = 1
 			}
@@ -37,12 +52,10 @@ func RootCommand() *cobra.Command {
 	m.PersistentFlags().StringVar(&username, "username", "", "Harbor username")
 	m.PersistentFlags().StringVar(&password, "password", "", "Harbor password")
 	m.PersistentFlags().IntVar(&concurrency, "concurrency", 4, "Number of concurrent delete operations")
-	_ = m.MarkPersistentFlagRequired("endpoint")
-	_ = m.MarkPersistentFlagRequired("username")
-	_ = m.MarkPersistentFlagRequired("password")
 
 	m.AddCommand(CleanCommand())
 	m.AddCommand(TagsCommand())
+	m.AddCommand(VersionCommand())
 
 	return m
 }
