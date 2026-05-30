@@ -9,7 +9,7 @@ import (
 )
 
 func (receiver *Client) fetchInitialCSRF() error {
-	req, err := http.NewRequest("GET", receiver.endpoint+"/c/login", nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%v/c/login", receiver.endpoint), nil)
 	if err != nil {
 		return fmt.Errorf("creating initial CSRF request: %w", err)
 	}
@@ -20,8 +20,8 @@ func (receiver *Client) fetchInitialCSRF() error {
 	if err != nil {
 		return fmt.Errorf("initial CSRF request failed: %w", err)
 	}
-	io.Copy(io.Discard, resp.Body)
-	resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
+	_, _ = io.Copy(io.Discard, resp.Body)
 
 	csrf := resp.Header.Get("X-Harbor-CSRF-Token")
 	if csrf == "" {
@@ -42,7 +42,7 @@ func (receiver *Client) login() error {
 	form.Set("principal", receiver.username)
 	form.Set("password", receiver.password)
 
-	req, err := http.NewRequest("POST", receiver.endpoint+"/c/login", strings.NewReader(form.Encode()))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%v/c/login", receiver.endpoint), strings.NewReader(form.Encode()))
 	if err != nil {
 		return fmt.Errorf("creating login request: %w", err)
 	}
@@ -53,14 +53,14 @@ func (receiver *Client) login() error {
 	if receiver.cookie != "" {
 		req.Header.Set("Cookie", receiver.cookie)
 	}
-	req.Header.Set("Referer", receiver.endpoint+"/account/sign-in")
+	req.Header.Set("Referer", fmt.Sprintf("%v/account/sign-in", receiver.endpoint))
 
 	resp, err := receiver.httpClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("login request failed: %w", err)
 	}
-	io.Copy(io.Discard, resp.Body)
-	resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
+	_, _ = io.Copy(io.Discard, resp.Body)
 
 	if resp.StatusCode != 200 && resp.StatusCode != 302 {
 		return fmt.Errorf("login failed with status %d", resp.StatusCode)
@@ -82,8 +82,8 @@ func (receiver *Client) refreshCSRFToken() error {
 	if err != nil {
 		return fmt.Errorf("refreshing CSRF token: %w", err)
 	}
-	io.Copy(io.Discard, resp.Body)
-	resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
+	_, _ = io.Copy(io.Discard, resp.Body)
 
 	if csrf := resp.Header.Get("X-Harbor-CSRF-Token"); csrf != "" {
 		receiver.csrf = csrf

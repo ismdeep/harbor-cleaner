@@ -56,6 +56,7 @@ func RootCommand() *cobra.Command {
 	m.AddCommand(CleanCommand())
 	m.AddCommand(TagsCommand())
 	m.AddCommand(VersionCommand())
+	m.AddCommand(ReposCommand())
 
 	return m
 }

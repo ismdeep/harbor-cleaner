@@ -5,6 +5,7 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/dustin/go-humanize"
 	"github.com/ismdeep/log"
 
 	"github.com/ismdeep/harbor-cleaner/harbor"
@@ -22,9 +23,9 @@ func main() {
 
 func printTable(tags []harbor.TagInfo) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	_, _ = fmt.Fprintln(w, "IMAGE\tTAG")
+	_, _ = fmt.Fprintln(w, "IMAGE\tTAG\tSIZE")
 	for _, t := range tags {
-		_, _ = fmt.Fprintf(w, "%s\t%s\n", t.Image, t.Name)
+		_, _ = fmt.Fprintf(w, "%s\t%s\t%s\n", t.Image, t.Name, humanize.Bytes(uint64(t.Size)))
 	}
 	_ = w.Flush()
 }

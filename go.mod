@@ -3,6 +3,7 @@ module github.com/ismdeep/harbor-cleaner
 go 1.26.3
 
 require (
+	github.com/dustin/go-humanize v1.0.1
 	github.com/ismdeep/log v0.2.2
 	github.com/kopeisec/fp v0.0.0-20260518141301-bfb39b4432f8
 	github.com/spf13/cobra v1.10.2

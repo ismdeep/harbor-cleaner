@@ -28,6 +28,7 @@ type TagInfo struct {
 	Name       string
 	Digest     string
 	Image      string
+	Size       int64
 }
 
 func NewClient(ctx context.Context, endpoint string, username string, password string, concurrency int) (*Client, error) {
@@ -63,13 +64,16 @@ func (receiver *Client) Concurrency() int {
 	return receiver.concurrency
 }
 
+func (receiver *Client) Host() string {
+	return receiver.host
+}
+
 func escapeRepoPath(repo string) string {
 	return strings.ReplaceAll(repo, "/", "%252F")
 }
 
 func (receiver *Client) newRequest(method, path string) (*http.Request, error) {
-	reqURL := receiver.endpoint + path
-	req, err := http.NewRequest(method, reqURL, nil)
+	req, err := http.NewRequest(method, fmt.Sprintf("%v%v", receiver.endpoint, path), nil)
 	if err != nil {
 		return nil, err
 	}

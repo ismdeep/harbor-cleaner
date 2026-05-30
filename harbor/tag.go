@@ -17,6 +17,7 @@ func (receiver *Client) ListRepoTags(project string, repo string) ([]TagInfo, er
 	type artifact struct {
 		Digest     string `json:"digest"`
 		PushTime   string `json:"push_time"`
+		Size       int64  `json:"size"`
 		ExtraAttrs struct {
 			CreatedAt string `json:"created"`
 		} `json:"extra_attrs"`
@@ -93,6 +94,7 @@ func (receiver *Client) ListRepoTags(project string, repo string) ([]TagInfo, er
 				Name:       tr.Name,
 				Digest:     a.Digest,
 				Image:      fmt.Sprintf("%v/%v/%v", receiver.host, project, repo),
+				Size:       a.Size,
 			}
 		})...)
 	}

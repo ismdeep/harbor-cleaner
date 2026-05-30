@@ -9,7 +9,7 @@ import (
 
 func TestNewClient(t *testing.T) {
 	ctx := context.Background()
-	clientNew, err := NewClient(ctx, endpoint, username, password)
+	clientNew, err := NewClient(ctx, endpoint, username, password, 4)
 	assert.NoError(t, err)
 	_ = clientNew
 }
