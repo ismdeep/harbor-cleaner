@@ -101,14 +101,6 @@ func (receiver *Client) doRequest(req *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
-func (receiver *Client) setAuth(req *http.Request) {
-	req.Header.Set("Cookie", receiver.cookie)
-	req.Header.Set("Accept", "application/json, text/plain, */*")
-	if receiver.csrf != "" {
-		req.Header.Set("X-Harbor-CSRF-Token", receiver.csrf)
-	}
-}
-
 func (receiver *Client) mergeCookies(newCookies []*http.Cookie) {
 	existing := parseCookieString(receiver.cookie)
 	for _, ck := range newCookies {

@@ -149,7 +149,10 @@ func (receiver *Client) DeleteTag(project string, tagInfo TagInfo) error {
 	if err != nil {
 		return fmt.Errorf("failed to create delete request for artifact, err: %v", err.Error())
 	}
-	receiver.setAuth(artReq)
+
+	artReq.Header.Set("Cookie", receiver.cookie)
+	artReq.Header.Set("Accept", "application/json, text/plain, */*")
+	artReq.Header.Set("X-Harbor-CSRF-Token", receiver.csrf)
 
 	artResp, artErr := receiver.httpClient.Do(artReq)
 	if artErr != nil {

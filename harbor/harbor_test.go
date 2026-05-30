@@ -13,3 +13,11 @@ func TestNewClient(t *testing.T) {
 	assert.NoError(t, err)
 	_ = clientNew
 }
+
+func TestClient_Concurrency(t *testing.T) {
+	t.Logf("concurrency = %v", client.Concurrency())
+}
+
+func TestClient_Host(t *testing.T) {
+	t.Logf("host = %v", client.Host())
+}
