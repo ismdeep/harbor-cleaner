@@ -57,6 +57,7 @@ func RootCommand() *cobra.Command {
 	m.AddCommand(TagsCommand())
 	m.AddCommand(VersionCommand())
 	m.AddCommand(ReposCommand())
+	m.AddCommand(QuotasCommand())
 
 	return m
 }
