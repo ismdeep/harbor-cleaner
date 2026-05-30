@@ -59,6 +59,10 @@ func NewClient(ctx context.Context, endpoint string, username string, password s
 	return &client, nil
 }
 
+func (receiver *Client) Concurrency() int {
+	return receiver.concurrency
+}
+
 func escapeRepoPath(repo string) string {
 	return strings.ReplaceAll(repo, "/", "%252F")
 }
