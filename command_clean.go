@@ -20,6 +20,8 @@ import (
 func CleanCommand() *cobra.Command {
 	var project string
 	var filters []string
+	var yesFlag bool
+	var dryRunFlag bool
 
 	m := &cobra.Command{
 		Use:   "clean",
@@ -62,15 +64,24 @@ func CleanCommand() *cobra.Command {
 
 			printTable(deleteTags)
 
-			fmt.Printf("\nThere are %d tag(s), Found %d tag(s) matching filter(s). Delete? [y/N] ", len(allTags), len(deleteTags))
-			reader := bufio.NewReader(os.Stdin)
-			answer, _ := reader.ReadString('\n')
-			answer = strings.TrimSpace(strings.ToLower(answer))
-			if answer != "y" {
-				fmt.Println("Cancelled.")
-				return nil
+			fmt.Printf("\nThere are %d tag(s), Found %d tag(s) matching filter(s).", len(allTags), len(deleteTags))
+			if !yesFlag {
+				fmt.Printf(" Delete? [y/N] ")
+				reader := bufio.NewReader(os.Stdin)
+				answer, _ := reader.ReadString('\n')
+				answer = strings.TrimSpace(strings.ToLower(answer))
+				if answer != "y" {
+					fmt.Println("Cancelled.")
+					return nil
+				}
+			} else {
+				fmt.Printf("\n")
+				log.WithContext(ctx).Info("Skip confirmation.")
 			}
 
+			if dryRunFlag {
+				log.WithContext(ctx).Info("Dry run. No tag will be deleted.")
+			}
 			var wg sync.WaitGroup
 			sem := make(chan struct{}, client.Concurrency())
 			total := len(deleteTags)
@@ -81,8 +92,10 @@ func CleanCommand() *cobra.Command {
 					defer wg.Done()
 					defer func() { <-sem }()
 					log.WithContext(ctx).Info("Deleting tag", zap.String("progress", fmt.Sprintf("%v/%v", i+1, total)), zap.String("image", t.Image), zap.String("tag", t.Name))
-					if err := client.DeleteTag(project, t); err != nil {
-						log.WithContext(ctx).Error("Deleting tag", zap.String("progress", fmt.Sprintf("%v/%v", i+1, total)), zap.String("image", t.Image), zap.String("tag", t.Name), zap.Error(err))
+					if !dryRunFlag {
+						if err := client.DeleteTag(project, t); err != nil {
+							log.WithContext(ctx).Error("Deleting tag", zap.String("progress", fmt.Sprintf("%v/%v", i+1, total)), zap.String("image", t.Image), zap.String("tag", t.Name), zap.Error(err))
+						}
 					}
 				}(i, tag)
 			}
@@ -94,7 +107,9 @@ func CleanCommand() *cobra.Command {
 	}
 
 	m.PersistentFlags().StringVar(&project, "project", "", "Harbor project name or ID")
-	m.PersistentFlags().StringArrayVarP(&filters, "filter", "f", nil, "Regex filter for tag names (can be specified multiple times)")
+	m.PersistentFlags().StringArrayVar(&filters, "filter", nil, "Regex filter for tag names (can be specified multiple times)")
+	m.PersistentFlags().BoolVar(&yesFlag, "yes", false, "Skip confirmation")
+	m.PersistentFlags().BoolVar(&dryRunFlag, "dry-run", false, "Dry run")
 
 	return m
 }

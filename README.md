@@ -32,7 +32,9 @@ harbor-cleaner [global flags] <command> [command flags]
 | Flag | Short | Type | Description |
 |------|-------|------|-------------|
 | `--project` | | `string` | Harbor project name or ID (required) |
-| `--filter` | `-f` | `stringArray` | Regex filter for tag names (can be specified multiple times, required) |
+| `--filter` | | `stringArray` | Regex filter for tag names (can be specified multiple times, required) |
+| `--yes` | `-y` | `bool` | Skip confirmation prompt |
+| `--dry-run` | | `bool` | Show matching tags without actually deleting them |
 
 ## `tags` Flags
 
@@ -63,9 +65,35 @@ harbor-cleaner \
   --password Harbor12345 \
   clean \
   --project my-project \
-  -f "^v1\\.0\\..*" \
-  -f "^dev-.*" \
+  --filter "^v1\\.0\\..*" \
+  --filter "^dev-.*" \
   --concurrency 8
+```
+
+Dry run (preview matching tags without deleting):
+
+```bash
+harbor-cleaner \
+  --endpoint https://docker.example.com \
+  --username admin \
+  --password Harbor12345 \
+  clean \
+  --project my-project \
+  --filter "^v1\\.0\\..*" \
+  --dry-run
+```
+
+Skip confirmation prompt:
+
+```bash
+harbor-cleaner \
+  --endpoint https://docker.example.com \
+  --username admin \
+  --password Harbor12345 \
+  clean \
+  --project my-project \
+  --filter "^dev-.*" \
+  --yes
 ```
 
 List all tags in a project:
